@@ -38,10 +38,12 @@ class MainActivity : CourierActivity() {
 
         Courier.initialize(this)
 
+        // Update the UI when the notification count changes
         notificationCountLiveData.observe(this, Observer { count ->
             binding.notifsCount.text = count.toString()
         })
 
+        //Display the UI depending on the user status
         if (Courier.shared.isUserSignedIn) {
             binding.signInBtn.text = "Sign Out"
             binding.user.text = "Welcome ${Courier.shared.userId}"
@@ -52,7 +54,8 @@ class MainActivity : CourierActivity() {
         binding.signInBtn.setOnClickListener {
             if (!Courier.shared.isUserSignedIn) {
                 Log.d("BTN CLICK: ", "Signing APP User IN")
-                // Shows the request notification popup
+
+                // Shows the request notification popup required in Android 13 and above
                 this.requestNotificationPermission()
 
                 val isGranted = this.isPushPermissionGranted ?: false
@@ -62,8 +65,8 @@ class MainActivity : CourierActivity() {
                         // Saves credentials locally and accesses the Courier API with them
                         // Uploads push notification devices tokens to Courier if needed
                         Courier.shared.signIn(
-                            accessToken = "pk_prod_PHGK9FKHTZ4Z5VJ42E1813JRETCC",
-                            clientKey = "MDA1NjI5ODEtZDkyOC00YjYwLWE4ZGUtMTExYjU4MTI2MWUz",
+                            accessToken = "YOUR-ACCESS-TOKEN",
+                            clientKey = "YOUR-CLIENT-KEY",
                             userId = "appUser1"
                         )
                        val fcmToken= Courier.shared.getFCMToken()
@@ -82,10 +85,10 @@ class MainActivity : CourierActivity() {
             }
         }
 
+        //Listens to changes in the Courier authentication status and updates the UI
         listener = Courier.shared.addAuthenticationListener { userId ->
             runOnUiThread {
                 Log.d("Courier Listener: ", userId ?: "No userId found")
-
                 if (userId != null) {
                     binding.signInBtn.text = "Sign Out"
                     binding.user.text = userId
@@ -93,6 +96,7 @@ class MainActivity : CourierActivity() {
                     binding.signInBtn.text = "Sign In"
                     binding.user.text = ""
                 }
+                notificationCountLiveData.value =0
             }
         }
     }
